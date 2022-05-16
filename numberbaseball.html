@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>숫자야구</title>
+</head>
+
+<body>
+    <form id="form">
+        <input type="text" id="input">
+        <button>확인</button>
+    </form>
+    <div id="logs"></div>
+    <script>
+        const $input = document.querySelector('#input');
+        const $form = document.querySelector('#form');
+        const $logs = document.querySelector('#logs');
+
+        const number = [];
+        for (let i = 1; i < 10; i += 1) {
+            number.push(i);
+        }
+
+        const answer = [];
+        for (let j = 0; j < 4; j += 1) {
+            const index = (Math.floor(Math.random() * (9 - j)));
+            answer.push(number[index]);
+            number.splice(index, 1);
+        }
+
+        console.log(answer);
+        const tries = [];
+
+        function checkInput(input) {
+            if (input.length !== 4) {
+                return alert('4자리 숫자를 입력하세요.');
+            }
+            if (new Set(input).size !== 4) {
+                return alert('중복된 값이 존재합니다.');
+            }
+            if (tries.includes(input)) {
+                return alert('이미 시도한 값입니다.');
+            }
+            return true;
+        }
+
+        let outCount = 0;
+
+        $form.addEventListener('submit', (event) => {
+            event.preventDefault(); // 기본 동작 막기 (새로고침?)
+            const value = $input.value;
+            $input.value = '';
+            if (!checkInput(value)) {
+                return;
+            }
+            if (answer.join('') === value) {
+                $logs.textContent = '홈런!';
+                return;
+            }
+            if (tries.length >= 9) {
+                const message = document.createTextNode(`패배! 정답은 ${answer.join('')}`);
+                $logs.appendChild(message);
+                return;
+            }
+
+            let strike = 0;
+            let ball = 0;
+
+            // answer: 3146, value: 1234
+            for (let i = 0; i < answer.length; i++) {
+                const index = value.indexOf(answer[i]);
+                if (index > -1) {
+                    if (index === i) {
+                        strike += 1;
+                    } else {
+                        ball += 1;
+                    }
+                }
+            }
+
+            if (strike === 0 && ball === 0) {
+                outCount += 1;
+                if (outCount === 3) {
+                    $logs.append(`${value}: 아웃! 현재 ${outCount}아웃 입니다.`, document.createElement('br'));
+                    $logs.append(`패배! 정답은 ${answer.join('')}`);
+                    return;
+                } else {
+                    $logs.append(`${value}: 아웃! 현재 ${outCount}아웃 입니다.`, document.createElement('br'));
+                }
+            } else {
+                $logs.append(`${value}: ${strike} 스트라이크 ${ball} 볼`, document.createElement('br'));
+            }
+
+            tries.push(value);
+        })
+    </script>
+</body>
+
+</html>
+
+<!--
+    백틱(``): 문자열 표현, 줄바꿈 쉽다.
+
+    ${}: 표현식(변수나 연산) 삽입. 
+
+    append() vs appendChild()
+    --append()--
+    1. Node object, DOMString(text) 사용 가능
+    2. 한번에 여러 개의 자식 요소 설정 가능
+    
+    --appendChild()--
+    1. 오직 Node object만
+    2. 한번에 오직 하나의 노드만 추가 가능
+    3. 무조건 creatTextNode()로 만들어 줘야 사용 가능
+
+    문자열은 creatTextNode 안해도 된다, 그냥 append 만 해주자.
+
+    Math.random(): 무작위로 숫자 뽑기, 범위는 0 <= x <1
+    Math.floor(): 내림
+    Math.ceil(): 올림
+    Math.round(): 반올림
+
+    includes(): 배열에 값 존재 여부 판단, true/false 반환
+    indexOf(): 배열에 값이 들어있다면 인덱스 반환, 없으면 -1
+
+    document.createElement(): 태그를 만드는 메서드
+    document.createTextNode(): 텍스트를 만드는 메서드
+    
+
+    --arr.forEach((element, index) => {});--
+    1. 반복문을 돌면서 배열의 원소값과 인덱스에 순서대로 접근
+    2. for문 보다는 성능이 떨어지지만 편리함
+    3. 메서드의 일종, 인수로 함수를 받음
+    4. 배열의 요소 하나 하나에 인수로 받은 함수를 각각 적용
+
+    --arr.map((element, index) => {});--
+    1. forEach와 비슷하지만 원소의 값 변경도 가능
+    2. 기존의 배열은 유지하고 새로운 배열을 생성
+    3. 보통 return으로 원소 넣어줌
+
+
+    arr(i): i 길이의 빈 배열 생성
+    arr(i).fill(j): 생성된 배열을 j로 채워줌, j의 기본값은 undefined
+
+
+    --document.querySelector()--
+    html 태그의 css 속성을 select 하고 접근하여 동작을 제어하는...? 느낌
+
+-->
